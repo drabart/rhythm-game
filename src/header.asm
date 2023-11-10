@@ -10,5 +10,5 @@ SECTION "Entry point", ROM0
 
 EntryPoint:
 	; Here is where the fun begins, happy coding :)
-    call GameState
+    call InitState 
 	jp EntryPoint
