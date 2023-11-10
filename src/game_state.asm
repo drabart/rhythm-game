@@ -14,7 +14,7 @@ GameState::
     jp nz, .noScroll
 
     ld a, [rSCY]
-    sub a, $10
+    sub a, $3
     ld [rSCY], a
 .noScroll
 
