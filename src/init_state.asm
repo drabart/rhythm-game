@@ -22,9 +22,12 @@ InitState::
     ld a, %11100100
     ld [rBGP], a
 
-    ; Trun on the display
+    ; Turn on the display
     ld a, LCDCF_ON | LCDCF_BGON
     ld [rLCDC], a
+
+    ; Copy DMA transfer routing int High RAM
+    call CopyDMATransfer
 
     call GameState
     jp InitState
