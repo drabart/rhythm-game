@@ -49,7 +49,7 @@ InitBg::
 ; Inits an empty line
 ; @params hl beginning of the line
 InitEmptyLine::
-    
+    push af 
     ld a, $0
     ld [hl+], a
     ld [hl+], a
@@ -81,5 +81,6 @@ InitEmptyLine::
     ld a, $0
     ld [hl+], a
     ld [hl+], a
+    pop af
 
     ret
