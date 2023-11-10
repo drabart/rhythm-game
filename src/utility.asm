@@ -31,7 +31,7 @@ Memset::
     jr nz, Memset
     ret
 
-; Soubrouting to copy soublroutine into HRAM
+; Subroutine to copy subroutine into HRAM
 ; https://gbdev.gg8.se/wiki/articles/OAM_DMA_tutorial
 ; (Cursed as hell)
 CopyDMATransfer::
@@ -96,38 +96,6 @@ Memswap::
     jr nz, Memswap  ; 3
     ret             ; 4
 
-; MemcpyOffsetGame
-; Copies data from ROM to RAM and adds $40 (Game Assets)
-; @param de Beginning of data in ROM
-; @param hl Beginning of target space in RAM
-; @param bc data size
-MemcpyOffsetGame::
-    ld a, [de]
-    add a, $40
-    ld [hl+], a
-    inc de
-    dec bc
-    ld a, b
-    or a, c
-    jr nz, MemcpyOffsetGame
-    ret
-
-; MemcpyOffsetMenu
-; Copies data from ROM to RAM and adds $50 (Game Assets)
-; @param de Beginning of data in ROM
-; @param hl Deginning of target space in RAM
-; @param bc data size
-MemcpyOffsetMenu::
-    ld a, [de]
-    add a, $4F
-    ld [hl+], a
-    inc de
-    dec bc
-    ld a, b
-    or a, c
-    jr nz, MemcpyOffsetMenu
-    ret
-
 ; Sub16
 ; Decreases all values at a given range by $10
 ; @param hl Beginning of data
@@ -165,13 +133,6 @@ WaitForVBlank::
     ret
 
 
-WaitForPaletteSwap::
-    ld a, [rLY]
-    cp $78
-    jr c, WaitForPaletteSwap
-    ret
-
-
 ; ClearOam
 ; Resets all OAM values to 0
 ; @param de - OAMBuffer
@@ -193,56 +154,6 @@ ClearOam::
     jr nz, ClearOam.clearOamBufferLoop
     ret
 
-InitPalettes:: 
-    ; set palette loader to auto increment
-    ld a, BCPSF_AUTOINC
-    ld [rBCPS], a
-
-    ; colors are at that label
-    ld hl, BgPaletteData
-
-    ; load 4 palettes of 4 colors
-    ld c, 4 * 4
-
-.rep:
-    ; load full color
-    ld a, [hl+]
-    ld [rBCPD], a
-    ld a, [hl+]
-    ld [rBCPD], a
-
-    dec c
-    ld a, c
-    cp a, 0
-    jr nz, .rep
-
-    ; set palette loader to auto increment
-    ld a, OCPSF_AUTOINC
-    ld [rOCPS], a
-
-    ; colors are at that label
-    ld hl, SpritePaletteData
-
-    ; load 5 palettes of 4 colors
-    ld c, 5 * 4
-
-.rep2:
-    ; load full color
-    ld a, [hl+]
-    ld [rOCPD], a
-    ld a, [hl+]
-    ld [rOCPD], a
-
-    dec c
-    ld a, c
-    cp a, 0
-    jr nz, .rep2
-
-    ret
-
-
-
-
 ; @param hl - palette id
 SetPalette::
     ld a, [wGameboyColor]
@@ -263,7 +174,7 @@ SetPalette::
     ret
 
 ; UpdateKeys
-; Updates wKeysPressed variable, storing information about keys pressed to bits:
+; Updates wKeyJustsPressed and wKeysDown variables, storing information about keys pressed to bits:
 ; %000000001 ($01) - A key
 ; %000000010 ($02) - B key
 ; %000000100 ($04) - START key
@@ -274,6 +185,9 @@ SetPalette::
 ; %010000000 ($80) - DOWN key
 ; use PADF_{key} define from hardware.inc
 UpdateKeys::
+    ld a, [wKeysDown]
+    ld e, a
+
     ld a, P1F_GET_BTN
     ldh [rP1], a
 
@@ -291,11 +205,18 @@ UpdateKeys::
     swap a
     xor a, b
     
+    ld [wKeysDown], a
 
-    ld [wKeysPressed], a
+    ld b, a
+
+    xor a, e
+    and a, b
+
+    ld [wKeysJustPressed], a
 
     ld a, P1F_GET_NONE
     ldh [rP1], a
+
     ret
 
 ; PollKeys
@@ -320,12 +241,6 @@ Rng::
     ld a, [rTIMA] ; xD
     ret
 
-PaletteNormalDGB::
-    db %11100100
-PaletteInvertedDGB::
-    db %00011011
-PaletteDarkDGB::
-    db %1111_0101
 
 SECTION "HardwareInfo", WRAM0
 
@@ -333,211 +248,9 @@ wGameboyColor:: db
 
 SECTION "VariablesMovement", WRAM0
 
-wKeysPressed:: db
+wKeysDown:: db
+wKeysJustPressed:: db
 
 SECTION "OAM DMA", HRAM
 
 hOAMDMA:: ds DMATransferEnd - DMATransfer
-
-SECTION "Palettes", ROM0
-
-
-BgPaletteData::
-    ; palette 1
-    ; color 1
-    ; GGGRRRRR
-    db %00001011
-    ; XBBBBBGG
-    db %01111010
-    ; color 2
-    ; GGGRRRRR
-    db %11011111
-    ; XBBBBBGG
-    db %00100110
-    ; color 3
-    ; GGGRRRRR
-    db %10111000
-    ; XBBBBBGG
-    db %00000001
-    ; color 4
-    ; GGGRRRRR
-    db %11001100
-    ; XBBBBBGG
-    db %00000000
-
-    ; palette 2
-    ; color 1
-    ; GGGRRRRR
-    db %01111100
-    ; XBBBBBGG
-    db %01010011
-    ; color 2
-    ; GGGRRRRR
-    db %11011111
-    ; XBBBBBGG
-    db %00100110
-    ; color 3
-    ; GGGRRRRR
-    db %10111000
-    ; XBBBBBGG
-    db %00000001
-    ; color 4
-    ; GGGRRRRR
-    db %11001100
-    ; XBBBBBGG
-    db %00000000
-
-    ; palette 3
-    ; color 1
-    ; GGGRRRRR
-    db %00001011
-    ; XBBBBBGG
-    db %01111010
-    ; color 2
-    ; GGGRRRRR
-    db %11111111
-    ; XBBBBBGG
-    db %01111111
-    ; color 3
-    ; GGGRRRRR
-    db %00011111
-    ; XBBBBBGG
-    db %00000010
-    ; color 4
-    ; GGGRRRRR
-    db %01100110
-    ; XBBBBBGG
-    db %00010001
-
-    ; palette 4
-    ; color 1
-    ; GGGRRRRR
-    db %10100100
-    ; XBBBBBGG
-    db %00011000
-    ; color 2
-    ; GGGRRRRR
-    db %11110110
-    ; XBBBBBGG
-    db %01011110
-    ; color 3
-    ; GGGRRRRR
-    db %11110110
-    ; XBBBBBGG
-    db %01011110
-    ; color 4
-    ; GGGRRRRR
-    db %11110110
-    ; XBBBBBGG
-    db %01011110
-
-SpritePaletteData::
-    ; palette 1 (player)
-    ; color 1 (transparent)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 2
-    ; GGGRRRRR
-    db %00110011
-    ; XBBBBBGG
-    db %00101011
-    ; color 3
-    ; GGGRRRRR
-    db %11001001
-    ; XBBBBBGG
-    db %00001001
-    ; color 4
-    ; GGGRRRRR
-    db %00000100
-    ; XBBBBBGG
-    db %00000101
-
-    ; palette 2 (enemy)
-    ; color 1 (transparent)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 2
-    ; GGGRRRRR
-    db %11011110
-    ; XBBBBBGG
-    db %01111111
-    ; color 3
-    ; GGGRRRRR
-    db %01011111
-    ; XBBBBBGG
-    db %00000001
-    ; color 4
-    ; GGGRRRRR
-    db %01000011
-    ; XBBBBBGG
-    db %00001000
-
-    ; palette 3 (shield)
-    ; color 1 (transparent)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 2
-    ; GGGRRRRR
-    db %00000111
-    ; XBBBBBGG
-    db %01101111
-    ; color 3
-    ; GGGRRRRR
-    db %01100010
-    ; XBBBBBGG
-    db %01100000
-    ; color 4 (not used)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-
-    ; palette 4 (effects)
-    ; color 1 (transparent)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 2
-    ; GGGRRRRR
-    db %01011000
-    ; XBBBBBGG
-    db %01101111
-    ; color 3 (not used)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 4 (not used)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-
-    ; palette 5 (jetpack)
-    ; color 1 (transparent)
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 2
-    ; GGGRRRRR
-    db %00000000
-    ; XBBBBBGG
-    db %00000000
-    ; color 3
-    ; GGGRRRRR
-    db %01011111
-    ; XBBBBBGG
-    db %00001101
-    ; color 4
-    ; GGGRRRRR
-    db %01101011
-    ; XBBBBBGG
-    db %00110001
