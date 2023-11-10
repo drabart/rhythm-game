@@ -40,6 +40,9 @@ InitBg::
     ret z
 
     call InitEmptyLine
+    ld c, $c
+    add hl, bc
+    dec a
 
     jp .loopBegin
 
