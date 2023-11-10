@@ -86,7 +86,6 @@ DEF dC2  EQU $A4
 ; Music sheet commands
 
 DEF NOTE            EQU $01
-DEF VIB             EQU $A1
 DEF LOOP            EQU $EE
 DEF END             EQU $FF
 

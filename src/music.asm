@@ -60,7 +60,7 @@ InitMusic::
 SwitchToMainTheme::
     xor a
     ld [wNoteFrame1], a
-    ld [wNoteFrameChannelCopy1], a
+    ld [wNoteFrameCopy1], a
     ld [wNoteFrame2], a
     ld [wNoteFrame3], a
     ld [wNoteFrame4], a
@@ -72,10 +72,10 @@ SwitchToMainTheme::
     ld hl, MainTheme1
     ld a, h
     ld [wPosition1], a
-    ld [wPositionChannelCopy1], a
+    ld [wPositionCopy1], a
     ld a, l
     ld [wPosition1 + 1], a
-    ld [wPositionChannelCopy1 + 1], a
+    ld [wPositionCopy1 + 1], a
 
     ld hl, MainTheme2
     ld a, h
@@ -100,12 +100,12 @@ SwitchToMainTheme::
 ; param @bc address of sound's music sheet
 StartSoundEffect::
     ld a, [wPosition1]
-    ld [wPositionChannelCopy1], a
+    ld [wPositionCopy1], a
     ld a, [wPosition1 + 1]
-    ld [wPositionChannelCopy1 + 1], a
+    ld [wPositionCopy1 + 1], a
 
     ld a, [wNoteFrame1]
-    ld [wNoteFrameChannelCopy1], a
+    ld [wNoteFrameCopy1], a
 
     ld a, b
     ld [wInterruptPosition1], a
@@ -120,12 +120,12 @@ StartSoundEffect::
     ret
 
 EndSoundEffect::
-    ld a, [wPositionChannelCopy1]
+    ld a, [wPositionCopy1]
     ld [wPosition1], a
-    ld a, [wPositionChannelCopy1 + 1]
+    ld a, [wPositionCopy1 + 1]
     ld [wPosition1 + 1], a
 
-    ld a, [wNoteFrameChannelCopy1]
+    ld a, [wNoteFrameCopy1]
     ld [wNoteFrame1], a
 
     xor a
@@ -154,11 +154,11 @@ PlayMusic::
     call Play1
     ; store real position
     ld a, [wPosition1]
-    ld [wPositionChannelCopy1], a
+    ld [wPositionCopy1], a
     ld a, [wPosition1 + 1]
-    ld [wPositionChannelCopy1 + 1], a
+    ld [wPositionCopy1 + 1], a
     ld a, [wNoteFrame1]
-    ld [wNoteFrameChannelCopy1], a
+    ld [wNoteFrameCopy1], a
     
     ; load interrupt position
     ld a, [wInterruptPosition1]
@@ -179,11 +179,11 @@ PlayMusic::
     ld a, [wNoteFrame1]
     ld [wInterruptNoteFrame1], a
     ; load real position (necessary here because of interrupting interrupt)
-    ld a, [wPositionChannelCopy1]
+    ld a, [wPositionCopy1]
     ld [wPosition1], a
-    ld a, [wPositionChannelCopy1 + 1]
+    ld a, [wPositionCopy1 + 1]
     ld [wPosition1 + 1], a
-    ld a, [wNoteFrameChannelCopy1]
+    ld a, [wNoteFrameCopy1]
     ld [wNoteFrame1], a
 
 .off1
@@ -211,8 +211,7 @@ PlayMusic::
     ret
 
 ; --------------------------------------------------------------------------------------------------------
-SECTION "EngineChannel1", ROM0
-; Vibrato is DEPRECATED
+SECTION "Engine1", ROM0
 
 RestoreSound1:
     ; load position into hl
@@ -257,18 +256,7 @@ Play1:
     ; check which command it is
 .case01: ; Play note --------------------------------------------
     cp a, NOTE
-    jr nz, .caseA1
-
-    ; apply vibrato
-    ld a, [wVibrato1]
-    ld b, a
-    and a, %11000000   ; get only top 2 bits
-    ld [rNR11], a
-    ld a, b ; load full vibrato
-    ; move to next vibrato
-    rlca
-    rlca
-    ld [wVibrato1], a
+    jr nz, .caseEE
     
     ld a, [hl+] ; load note length (+1)
     ld c, a
@@ -341,19 +329,6 @@ Play1:
     ld [wPosition1 + 1], a
 
     jp .endSwitch
-.caseA1: ; Vibrato -------------------------------------------------
-    cp a, VIB
-    jr nz, .caseEE
-
-    ld a, [hl+]
-    ld [wVibrato1], a
-
-    ld a, h
-    ld [wPosition1], a
-    ld a, l
-    ld [wPosition1 + 1], a
-
-    jp Play1
 .caseEE: ; Loop -----------------------------------------------------
     cp a, LOOP
     jr nz, .caseFF
@@ -419,11 +394,11 @@ Play1:
     xor a
     ld [wInterrupt1], a
     ; load real position back
-    ld a, [wPositionChannelCopy1]
+    ld a, [wPositionCopy1]
     ld [wPosition1], a
-    ld a, [wPositionChannelCopy1 + 1]
+    ld a, [wPositionCopy1 + 1]
     ld [wPosition1 + 1], a
-    ld a, [wNoteFrameChannelCopy1]
+    ld a, [wNoteFrameCopy1]
     ld [wNoteFrame1], a
 
     call RestoreSound1
@@ -433,7 +408,7 @@ Play1:
     ret
 
 ; --------------------------------------------------------------------------------------------------------
-SECTION "EngineChannel2", ROM0
+SECTION "Engine2", ROM0
 
 Play2:
     ; load position into hl
@@ -447,18 +422,7 @@ Play2:
     ; check which command it is
 .case01: ; Play note --------------------------------------------
     cp a, NOTE
-    jr nz, .caseA1
-
-    ; apply vibrato
-    ld a, [wVibrato2]
-    ld b, a
-    and a, %11000000   ; get only top 2 bits
-    ld [rNR21], a
-    ld a, b ; load full vibrato
-    ; move to next vibrato
-    rlca
-    rlca
-    ld [wVibrato2], a
+    jr nz, .caseEE
     
     ld a, [hl+] ; load note length (+1)
     ld c, a
@@ -508,19 +472,6 @@ Play2:
     ld [rNR24], a
 
     jr .endSwitch
-.caseA1: ; Vibrato -------------------------------------------------
-    cp a, VIB
-    jr nz, .caseEE
-
-    ld a, [hl+]
-    ld [wVibrato2], a
-
-    ld a, h
-    ld [wPosition2], a
-    ld a, l
-    ld [wPosition2 + 1], a
-
-    jr Play2
 .caseEE: ; Loop -----------------------------------------------------
     cp a, LOOP
     jr nz, .caseFF
@@ -580,7 +531,7 @@ Play2:
     ret
 
 ; --------------------------------------------------------------------------------------------------------
-SECTION "EngineChannel3", ROM0
+SECTION "Engine3", ROM0
 
 Play3:
     ; load position into hl
@@ -741,7 +692,7 @@ Play3:
     ret
 
 ; --------------------------------------------------------------------------------------------------------
-SECTION "EngineChannel4", ROM0
+SECTION "Engine4", ROM0
 
 Play4:
     ; load position into hl
@@ -860,73 +811,6 @@ Play4:
 
     ret
 
-; sets vibrato on channel 1
-; vibrato - a
-SetVibrato1:
-    ld b, a
-    and a, %00000011
-    ld [wVibrato1 + 3], a
-
-    ld a, b
-    and a, %00001100
-    srl a
-    srl a
-    ld [wVibrato1 + 2], a
-
-    ld a, b
-    and a, %00110000
-    srl a
-    srl a
-    srl a
-    srl a
-    ld [wVibrato1 + 1], a
-
-    ld a, b
-    and a, %11000000
-    srl a
-    srl a
-    srl a
-    srl a
-    srl a
-    srl a
-    ld [wVibrato1 + 0], a
-
-    ret
-; sets vibrato on channel 2
-; vibrato - a
-SetVibrato2:
-    ld b, a
-    and a, %00000011
-    ld [wVibrato2 + 3], a
-
-    ld a, b
-    and a, %00001100
-    srl a
-    srl a
-    ld [wVibrato2 + 2], a
-
-    ld a, b
-    and a, %00110000
-    srl a
-    srl a
-    srl a
-    srl a
-    ld [wVibrato2 + 1], a
-
-    ld a, b
-    and a, %11000000
-    srl a
-    srl a
-    srl a
-    srl a
-    srl a
-    srl a
-    ld [wVibrato2 + 0], a
-
-    ret
-
-
-
 SECTION "MusicVariables", WRAM0
 
 wOn1: ds 1               ; is channel 1 on
@@ -934,7 +818,7 @@ wOn2: ds 1               ; is channel 2 on
 wOn3: ds 1               ; is channel 3 on
 wOn4: ds 1               ; is channel 4 on
 wPosition1: ds 2         ; pointer to current command in channel 1
-wPositionChannelCopy1: ds 2     ; pointer to current command in channel 1
+wPositionCopy1: ds 2     ; pointer to current command in channel 1
 wPosition2: ds 2         ; pointer to current command in channel 2
 wPosition3: ds 2         ; pointer to current command in channel 3
 wPosition4: ds 2         ; pointer to current command in channel 4
@@ -943,7 +827,7 @@ wSkipMusic1: ds 1        ; flag for the interrupt being carried out
 wInterruptPosition1: ds 2  ; position of the current interrupt 
 wInterruptNoteFrame1: ds 1  ; number of frames of last note 1
 wNoteFrame1: ds 1        ; number of frames of last note 1
-wNoteFrameChannelCopy1: ds 1        ; number of frames of last note 1
+wNoteFrameCopy1: ds 1        ; number of frames of last note 1
 wNoteFrame2: ds 1        ; number of frames of last note 2
 wNoteFrame3: ds 1        ; number of frames of last note 3
 wNoteFrame4: ds 1        ; number of frames of last note 4
@@ -951,8 +835,6 @@ wLoopTimes1: ds 1        ; number times to loop back 1
 wLoopTimes2: ds 1        ; number times to loop back 2
 wLoopTimes3: ds 1        ; number times to loop back 3
 wLoopTimes4: ds 1        ; number times to loop back 4
-wVibrato1: ds 1          ; vibrato cycle of channel 1
-wVibrato2: ds 1          ; vibrato cycle of channel 2
 
 SECTION "WavePatterns", ROM0
 
