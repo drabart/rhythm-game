@@ -8,9 +8,10 @@ GameState::
 
 .loop
     call WaitForVBlank
+    call UpdateKeys
 
     ld a, [rSCX]
-    inc a
+    add a, $10
     ld [rSCX], a
 
     jp .loop
