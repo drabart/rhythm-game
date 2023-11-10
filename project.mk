@@ -35,7 +35,7 @@ MBC := 0x03
 SRAMSIZE := 0x03
 
 # ROM name
-ROMNAME := jumpingDoodle
+ROMNAME := rhythmGame
 ROMEXT  := gb
 
 
