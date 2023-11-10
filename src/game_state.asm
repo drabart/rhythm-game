@@ -18,4 +18,6 @@ GameState::
 Init:
     call WaitForVBlank
 
+    call CopyDMATransfer
+
     ret
