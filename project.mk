@@ -10,10 +10,10 @@ PADVALUE := 0xFF
 VERSION := 0
 
 # 4-ASCII letter game ID
-GAMEID := JDOD
+GAMEID := RTMG
 
 # Game title, up to 11 ASCII chars
-TITLE := JUMP_DOODLE
+TITLE := RHYTHM_GAME
 
 # New licensee, 2 ASCII chars
 # Homebrew games FTW!
@@ -50,9 +50,9 @@ ASFLAGS += -h
 # ASFLAGS += -E
 
 # Game Boy Color compatible
-FIXFLAGS += -c
+# FIXFLAGS += -c
 # Game Boy Color required
-# FIXFLAGS += -C
+FIXFLAGS += -C
 
 # Super Game Boy compatible
 # FIXFLAGS += -s
