@@ -31,6 +31,11 @@ GameState::
 NewNoteSpace::
 
     ld a, b
+
+    and a, $18
+    ret nz
+
+    ld a, b
     sub a, $8
 
     ld h, $0
@@ -47,8 +52,6 @@ NewNoteSpace::
 
     call Rng
     ld b, a
-    and a, $3
-    ret nz
 
     ld a, b
     srl a
