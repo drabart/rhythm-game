@@ -37,7 +37,7 @@ InitState::
     ld c, BackgroundPalette.end - BackgroundPalette
     ld hl, BackgroundPalette.end
 
-.rep
+.repBgPaletteLoad
     ; load full color
     dec hl
     ld a, [hl]
@@ -47,12 +47,34 @@ InitState::
     ld [rBCPD], a
 
     dec c
+    dec c
     ld a, c
     cp a, 0
-    jr nz, .rep
+    jr nz, .repBgPaletteLoad
+
+    ld a, OCPSF_AUTOINC
+    ld [rOCPS], a
+
+    ld c, SpritesPalettes.end - SpritesPalettes
+    ld hl, SpritesPalettes.end
+
+.repSpritePaletteLoad
+    ; load full color
+    dec hl
+    ld a, [hl]
+    ld [rOCPD], a
+    dec hl
+    ld a, [hl]
+    ld [rOCPD], a
+
+    dec c
+    dec c
+    ld a, c
+    cp a, 0
+    jr nz, .repSpritePaletteLoad
 
     ; Turn on the display
-    ld a, LCDCF_ON | LCDCF_BGON
+    ld a, LCDCF_ON | LCDCF_BGON | LCDCF_OBJON
     ld [rLCDC], a
 
     ; Copy DMA transfer routing into High RAM
@@ -63,7 +85,10 @@ InitState::
     ld [wKeysDown], a
     ld [wKeysJustPressed], a
 
-    ; Turn on thre timer
+    ; Init indicators
+    call InitIndicators
+
+    ; Turn on the timer
     ld a, $4
     ld [rTAC], a
 
