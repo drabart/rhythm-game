@@ -4,5 +4,5 @@ SECTION "Palettes", ROM0
 
 BackgroundPalette::
     ; Palette 1
-    db $38, $0E, $54, $15, $68, $1A, $7C, $19
+    db $64, $17, $6C, $1B, $74, $1C, $7C, $1E  
 .end::

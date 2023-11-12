@@ -43,13 +43,17 @@ InitState::
     ld a, LCDCF_ON | LCDCF_BGON
     ld [rLCDC], a
 
-    ; Copy DMA transfer routing int High RAM
+    ; Copy DMA transfer routing into High RAM
     call CopyDMATransfer
 
     ; Init wKeys
     xor a
     ld [wKeysDown], a
     ld [wKeysJustPressed], a
+
+    ; Turn on thre timer
+    ld a, $4
+    ld [rTAC], a
 
     call GameState
     jp InitState

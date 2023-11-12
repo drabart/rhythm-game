@@ -238,7 +238,7 @@ PollKeys::
 ; Rng
 ; @return a the random number
 Rng::
-    ld a, [rTIMA] ; xD
+    ld a, [rDIV] ; xD
     ret
 
 
