@@ -251,6 +251,10 @@ SECTION "VariablesMovement", WRAM0
 wKeysDown:: db
 wKeysJustPressed:: db
 
+SECTION "OAM Data", WRAM0, ALIGN[8]
+
+OAMBuffer:: ds 160
+
 SECTION "OAM DMA", HRAM
 
 hOAMDMA:: ds DMATransferEnd - DMATransfer

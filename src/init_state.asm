@@ -18,6 +18,18 @@ InitState::
 
     call InitBg
 
+    ; Loading incdicators into memory
+    ld de, Indicators 
+    ld hl, $8000
+    ld bc, Indicators.end -Indicators 
+    call Memcpy
+
+    ; Clearing OAM Buffer
+    ld d, $0
+    ld hl, OAMBuffer
+    ld bc, $100
+    call Memset
+
     ; Set background palette
     ld a, BCPSF_AUTOINC
     ld [rBCPS], a

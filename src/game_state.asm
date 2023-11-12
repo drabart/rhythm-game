@@ -25,6 +25,10 @@ GameState::
     cp a, $4
     call z, ClearOldSpace
 
+    ; DMA OAMBuffer -> OAM
+    ld a, $C0
+    call hOAMDMA
+
     jp .loop
 
 ; @param b rSCY
