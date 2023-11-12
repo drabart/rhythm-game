@@ -127,7 +127,7 @@ SetIndicator::
     ld b, $0
     ld hl, wIndYPos1
     add hl, bc
-    ld a, $90
+    ld a, $88
     ld [hl], a
 
     ld hl, wIndTimer1
