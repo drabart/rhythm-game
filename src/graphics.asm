@@ -9,3 +9,7 @@ Tiles::
 Indicators::
     incbin "assets/indicators.2bpp"
 .end::
+
+Arrow::
+    incbin "assets/arrow.2bpp"
+.end::

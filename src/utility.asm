@@ -48,7 +48,7 @@ CopyDMATransfer::
 
 ; DMATransfer
 ; Copies OAM data from high RAM
-; @param a Place in high ram divided by $100
+; @param a Place in ram divided by $100
 ; https://gbdev.io/pandocs/OAM_DMA_Transfer.html
 DMATransfer::
     ldh [rDMA], a  ; start DMA transfer (starts right after instruction)
@@ -124,7 +124,7 @@ Add16::
     dec b
     jr Add16
 
-; WaitPorVBlank
+; WaitForVBlank
 ; Waits until VBlank (duh)
 WaitForVBlank::
     ld a, [rLY]
@@ -132,6 +132,13 @@ WaitForVBlank::
     jr nz, WaitForVBlank
     ret
 
+; WaitForLY
+; @param b line for which to wait
+WaitForLY::
+    ld a, [rLY]
+    cp b
+    jr nz, WaitForLY
+    ret
 
 ; ClearOam
 ; Resets all OAM values to 0

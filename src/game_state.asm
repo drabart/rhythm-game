@@ -4,29 +4,34 @@ SECTION "GameState", ROM0
 
 
 GameState::
+    call InitArrows
 
 .loop
-    call WaitForVBlank
-    call UpdateKeys
-
+    call Rng
+    ld de, %00_100_111_00_101_110
     ld a, [rSCY]
     sub a, $1
     ld [rSCY], a
+    ld b, a
+    and a, $7
+    cp a, $0
+    call z, BufferNewLine
+
+    call WaitForVBlank
+    call UpdateKeys
+
+
+    ld a, [rSCY]
 
     ld b, a
     and a, $7
     cp a, $0
-    push bc
-    call z, NewNoteSpace
-    pop bc
+    call z, CopyNewLine    
 
-    ld a, b
-    and a, $7
-    cp a, $4
-    call z, ClearOldSpace
+    call ArrowPress
 
     ; DMA OAMBuffer -> OAM
-    ld a, $C0
+    ld a, HIGH(OAMBuffer)
     call hOAMDMA
 
     ; DEBUG ONLY spawn indicator on press
@@ -80,12 +85,13 @@ GameState::
     jp .loop
 
 ; @param b rSCY
-NewNoteSpace::
+; @param de lines specification
+BufferNewLine::
 
     ld a, b
 
-    and a, $18
-    ret nz
+    ; and a, $18
+    ; ret nz
 
     ld a, b
     sub a, $8
@@ -98,38 +104,65 @@ NewNoteSpace::
     add hl, hl
     add hl, hl
 
-    ld bc, $9804
+    ld bc, wNewLine + 4
     add hl, bc
 
-
-    call Rng
-    ld b, a
-
-    ld a, b
+    ld a, d
+    and a, %00111000 
     srl a
     srl a
-    and a, $3
-.inchl
-    cp a, $0
-    jp z, .inchlend
+    add a, $2
+
+    ld [hl+], a
+    inc a
+    ld [hl+], a
     dec a
-    inc hl
-    inc hl
-    inc hl
-    jp .inchl
-.inchlend
+    ld [hl+], a
 
-    ld a, $4
+    ld a, d
+    and a, %00000111 
+    sla a
+    add a, $2
+
     ld [hl+], a
-    ld a, $5
+    inc a
     ld [hl+], a
-    ld a, $4
+    dec a
+    ld [hl+], a
+
+    ld a, e
+    and a, %00111000 
+    srl a
+    srl a
+    add a, $2
+
+    ld [hl+], a
+    inc a
+    ld [hl+], a
+    dec a
+    ld [hl+], a
+
+    ld a, e
+    and a, %00000111 
+    sla a
+    add a, $2
+
+    ld [hl+], a
+    inc a
+    ld [hl+], a
+    dec a
     ld [hl+], a
     ret
 
-ClearOldSpace::
+; @param b rSCY
+CopyNewLine::
     ld a, b
-    add a, $94
+
+    ; and a, $18
+    ; ret nz
+
+    ld a, b
+    sub a, $8
 
     ld h, $0
     ld l, a
@@ -139,34 +172,27 @@ ClearOldSpace::
     add hl, hl
     add hl, hl
 
+    ld bc, wNewLine +  4
+
+    push hl
+
+    add hl, bc
+
+    ld d, h
+    ld e, l
+
+    pop hl
+
     ld bc, $9804
     add hl, bc
 
-    ld a, $2
-    ld [hl+], a
-    ld a, $3
-    ld [hl+], a
-    ld a, $2
-    ld [hl+], a
-    ld [hl+], a
-    ld a, $3
-    ld [hl+], a
-    ld a, $2
-    ld [hl+], a
-    ld [hl+], a
-    ld a, $3
-    ld [hl+], a
-    ld a, $2
-    ld [hl+], a
-    ld [hl+], a
-    ld a, $3
-    ld [hl+], a
-    ld a, $2
-    ld [hl+], a
+    ld b, $0
+    ld c, $C
+    
+    call Memcpy
 
     ret
 
+SECTION "GameVariables", WRAM0, ALIGN[8]
 
-SECTION "GameVariables", WRAM0
-
-
+wNewLine:: ds 32 * 32
