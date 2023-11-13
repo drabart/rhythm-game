@@ -25,6 +25,8 @@ GameState::
     cp a, $4
     call z, ClearOldSpace
 
+    call PlayMusic
+
     ; DMA OAMBuffer -> OAM
     ld a, $C0
     call hOAMDMA
