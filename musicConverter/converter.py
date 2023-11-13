@@ -38,8 +38,15 @@ for channel in beepboxSave["channels"]:
     print("\n")
 
     sequence = channel["sequence"]
+    seqID = 0
     for pattern in sequence:
         channelA.extend(patterns[pattern])
+        seqID += 1
+        if seqID == beepboxSave["introBars"]:
+            channelA.append([-1, "loopStart"])
+        if seqID == beepboxSave["introBars"] + beepboxSave["loopBars"]:
+            channelA.append([-2, "loopStart", 1])
+            break
 
     channels.append(channelA)
 
@@ -85,7 +92,8 @@ def convertPitch4(pitch):
     return notesDict.drum[pitch]
 
 
-outputFile = open("output1.bin", "wb")
+outputFile = open("output1.bin", "w")
+outputFile.write("Music1::\n")
 
 print(channels[0])
 
@@ -94,33 +102,14 @@ for note in channels[0]:
     if note[1] == 0:
         continue
 
-    freq = convertPitch12(note[0])
-    length = note[1] * tickToFrames
-    nrl = rl + length
-    if nrl - int(nrl) < rl - int(rl):
-        length = int(length) + 1
-    else:
-        length = int(length)
-    rl = nrl
+    if note[0] == -1:
+        output = "." + note[1] + ":" + "\n"
+        outputFile.write(output)
+        continue
 
-    output = [0xA1, length]
-    if freq != 0:
-        output.append(notesDict.volumeControl["VOL_MAX"])
-    else:
-        output.append(notesDict.volumeControl["VOL_MUTE"])
-    output.append(freq % 256)
-    output.append(int(freq / 256))
-    outputFile.write(bytes(output))
-    print(bytes(output))
-
-outputFile.close()
-outputFile = open("output2.bin", "wb")
-
-print(channels[1])
-
-rl = 0
-for note in channels[1]:
-    if note[1] == 0:
+    if note[0] == -2:
+        output = "\n\tdb $EE" + "\n" + "\tdw " + note[1] + "\n\tdb $" + hex(note[2])[2:] + "\n"
+        outputFile.write(output)
         continue
 
     freq = convertPitch12(note[0])
@@ -132,74 +121,15 @@ for note in channels[1]:
         length = int(length)
     rl = nrl
 
-    output = [0xA1, length]
+    output = "\tdb $A1, "
+    output += "$" + hex(length)[2:] + ", "
     if freq != 0:
-        output.append(notesDict.volumeControl["VOL_MAX"])
+        output += "$" + hex(notesDict.volumeControl["VOL_MAX"])[2:] + ", "
     else:
-        output.append(notesDict.volumeControl["VOL_MUTE"])
-    output.append(freq % 256)
-    output.append(int(freq / 256))
-    outputFile.write(bytes(output))
-    print(bytes(output))
+        output += "$" + hex(notesDict.volumeControl["VOL_MUTE"])[2:] + ", "
+    output += "$" + hex(freq % 256)[2:] + ", "
+    output += "$" + hex(int(freq / 256))[2:] + "\n"
+    outputFile.write(output)
+    print(output)
 
 outputFile.close()
-outputFile = open("output3.bin", "wb")
-
-print(channels[2])
-
-rl = 0
-for note in channels[2]:
-    if note[1] == 0:
-        continue
-
-    freq = convertPitch3(note[0])
-    length = note[1] * tickToFrames
-    nrl = rl + length
-    if nrl - int(nrl) < rl - int(rl):
-        length = int(length) + 1
-    else:
-        length = int(length)
-    rl = nrl
-
-    output = [0xA1, length]
-    if freq != 0:
-        output.append(notesDict.volumeControl["VOL3_MAX"])
-    else:
-        output.append(notesDict.volumeControl["VOL3_MUTE"])
-    output.append(freq % 256)
-    output.append(int(freq / 256))
-    outputFile.write(bytes(output))
-    print(bytes(output))
-
-outputFile.close()
-outputFile = open("output4.bin", "wb")
-
-print(channels[3])
-
-rl = 0
-for note in channels[3]:
-    if note[1] == 0:
-        continue
-
-    freq = convertPitch4(note[0])
-    length = note[1] * tickToFrames
-    nrl = rl + length
-    if nrl - int(nrl) < rl - int(rl):
-        length = int(length) + 1
-    else:
-        length = int(length)
-    rl = nrl
-
-    output = [0xA1, length]
-    if freq != 0:
-        output.append(notesDict.volumeControl["VOLD_MAX_L"])
-    else:
-        output.append(notesDict.volumeControl["VOLD_MUTE"])
-    output.append(freq % 256)
-    output.append(int(freq / 256))
-    outputFile.write(bytes(output))
-    print(bytes(output))
-
-outputFile.close()
-
-
