@@ -9,3 +9,7 @@ Tiles::
 Indicators::
     incbin "assets/indicators.2bpp"
 .end::
+
+FontTiles::
+    incbin "assets/font.2bpp"
+FontTilesEnd::
