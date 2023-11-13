@@ -30,6 +30,8 @@ GameState::
 
     call ArrowPress
 
+    call PlayMusic
+
     ; DMA OAMBuffer -> OAM
     ld a, HIGH(OAMBuffer)
     call hOAMDMA

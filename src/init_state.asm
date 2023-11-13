@@ -97,6 +97,7 @@ InitState::
 
     ; Init indicators
     call InitIndicators
+    call InitMusic
 
     ; Turn on the timer
     ld a, $4
