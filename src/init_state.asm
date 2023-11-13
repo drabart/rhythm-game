@@ -103,6 +103,12 @@ InitState::
     ld a, $4
     ld [rTAC], a
 
+    ld hl, CustomLevel
+    ld a, h
+    ld [wLevelCounter], a
+    ld a, l
+    ld [wLevelCounter + 1], a
+
     call GameState
     jp InitState
 
