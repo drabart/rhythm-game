@@ -62,11 +62,16 @@ UpdateIndicators::
 
     ; Otherwise decrement timer and move text up
 .timerNotZero
+    ; inc c
+
     ld hl, wIndTimer1
     add hl, bc
     ld a, [hl]
     dec a
     ld [hl], a
+    ; and a, $1
+    ; cp a, $0
+    ; jp z, .updateLoop
 
     ld hl, wIndYPos1
     add hl, bc
@@ -127,12 +132,12 @@ SetIndicator::
     ld b, $0
     ld hl, wIndYPos1
     add hl, bc
-    ld a, $90
+    ld a, $80
     ld [hl], a
 
     ld hl, wIndTimer1
     add hl, bc
-    ld a, $0C
+    ld a, $18
     ld [hl], a
 
     ld hl, wIndFlag1

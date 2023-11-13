@@ -13,3 +13,7 @@ Indicators::
 FontTiles::
     incbin "assets/font.2bpp"
 FontTilesEnd::
+    
+Arrow::
+    incbin "assets/arrow.2bpp"
+.end::
