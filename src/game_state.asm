@@ -2,7 +2,7 @@ INCLUDE "hardware.inc/hardware.inc"
 
 SECTION "GameState", ROM0
 
-wEmptyLine:: db $00, $00
+EmptyLine:: db $00, $00
 
 GameState::
     call InitArrows
@@ -98,9 +98,31 @@ BufferNewLine::
     ld e, a
 
     ld a, h
+    cp a, HIGH(CustomLevel.end)
+    jp nz, .checkAlreadyEmpty
+    ld a, l
+    cp a, LOW(CustomLevel.end)
+    jp nz, .checkAlreadyEmpty
+
+    jp .setPermanentEmptyLine
+.checkAlreadyEmpty
+    ld a, h
+    cp a, HIGH(EmptyLine + 2)
+    jp nz, .increment
+    ld a, l
+    cp a, LOW(EmptyLine + 2)
+    jp nz, .increment
+
+    jp .levelCounterEnd
+.setPermanentEmptyLine
+    ld hl, EmptyLine
+.increment
+    ld a, h
     ld [wLevelCounter], a
     ld a, l
     ld [wLevelCounter + 1], a
+.levelCounterEnd
+    
 
     ld a, b
 
